@@ -12,15 +12,11 @@ const hasWalletConnectProjectId = computed(() => Boolean(config.public.walletCon
 const isBaseChain = computed(() => Number(network.value.chainId) === base.id)
 const shortAddress = computed(() => {
   const address = account.value.address
-
-  return address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Not connected'
+  return address ? `${address.slice(0, 6)}…${address.slice(-4)}` : 'Not connected'
 })
 
 const openWallet = async () => {
-  if (!hasWalletConnectProjectId.value) {
-    return
-  }
-
+  if (!hasWalletConnectProjectId.value) return
   await open({ view: account.value.isConnected ? 'Account' : 'Connect', namespace: 'eip155' })
 }
 
@@ -32,41 +28,49 @@ const switchToBase = async () => {
 <template>
   <ClientOnly>
     <section class="panel">
+      <!-- Network status -->
       <div class="flex items-center justify-between gap-3">
         <div>
-          <p class="text-sm text-[var(--muted)]">Wallet network</p>
-          <h2 class="mt-1 text-2xl font-semibold">Base</h2>
+          <p class="eyebrow">Network</p>
+          <h2 class="mt-1 text-xl font-bold tracking-tight">Base</h2>
         </div>
         <span class="chain-badge" :class="{ 'is-live': account.isConnected && isBaseChain }">
           {{ account.isConnected && isBaseChain ? 'Ready' : 'Base only' }}
         </span>
       </div>
 
-      <div class="mt-5 grid gap-3">
-        <button class="primary-button w-full" type="button" :disabled="!hasWalletConnectProjectId" @click="openWallet">
-          <Icon name="lucide:wallet-cards" class="size-5" />
-          {{ account.isConnected ? 'Manage wallet' : 'Connect wallet' }}
-        </button>
-        <button class="secondary-button w-full" type="button" :disabled="!account.isConnected || isBaseChain" @click="switchToBase">
-          <Icon name="lucide:plug-zap" class="size-5" />
-          Switch to Base
-        </button>
-      </div>
-
-      <div class="mt-5 rounded-2xl bg-[var(--panel-soft)] p-4">
-        <dl class="grid gap-3 text-sm">
+      <!-- Wallet info -->
+      <div class="mt-4 rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3">
+        <dl class="grid gap-2.5 text-sm">
           <div class="flex items-center justify-between gap-3">
-            <dt class="text-[var(--muted)]">Address</dt>
-            <dd class="font-semibold">{{ shortAddress }}</dd>
+            <dt class="text-[var(--muted)] font-medium">Address</dt>
+            <dd class="font-bold tabular">{{ shortAddress }}</dd>
           </div>
           <div class="flex items-center justify-between gap-3">
-            <dt class="text-[var(--muted)]">Chain ID</dt>
-            <dd class="font-semibold">{{ network.chainId || base.id }}</dd>
+            <dt class="text-[var(--muted)] font-medium">Chain ID</dt>
+            <dd class="font-bold tabular">{{ network.chainId || base.id }}</dd>
           </div>
         </dl>
       </div>
 
-      <button v-if="account.isConnected" class="mt-4 text-sm font-bold text-[var(--muted)] underline underline-offset-4" type="button" @click="disconnect({ namespace: 'eip155' })">
+      <!-- Actions -->
+      <div class="mt-4 grid gap-2">
+        <button class="primary-button w-full text-sm" type="button" :disabled="!hasWalletConnectProjectId" @click="openWallet">
+          <Icon name="lucide:wallet-cards" class="size-4" />
+          {{ account.isConnected ? 'Manage wallet' : 'Connect wallet' }}
+        </button>
+        <button class="secondary-button w-full text-sm" type="button" :disabled="!account.isConnected || isBaseChain" @click="switchToBase">
+          <Icon name="lucide:plug-zap" class="size-4" />
+          Switch to Base
+        </button>
+      </div>
+
+      <button
+        v-if="account.isConnected"
+        class="mt-3 w-full text-center text-xs font-bold uppercase tracking-widest text-[var(--muted)] transition hover:text-[var(--live)]"
+        type="button"
+        @click="disconnect({ namespace: 'eip155' })"
+      >
         Disconnect
       </button>
     </section>

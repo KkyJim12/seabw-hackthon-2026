@@ -10,42 +10,91 @@ for (const item of auctions) {
 
 <template>
   <section class="page-shell">
-    <p class="eyebrow">Auction Page</p>
-    <h1 class="mt-2 text-4xl font-semibold sm:text-5xl">All auction products</h1>
-    <p class="mt-4 max-w-2xl text-lg leading-8 text-[var(--muted)]">
-      A live marketplace of rare luxury lots from every shop, with current bids, time remaining, and shop-level discovery.
-    </p>
+    <!-- Page header -->
+    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <div>
+        <p class="eyebrow">Live market</p>
+        <h1 class="mt-1.5 text-4xl font-black tracking-tight sm:text-5xl">Auction lots</h1>
+        <p class="mt-3 max-w-xl text-base leading-7 text-[var(--muted)]">
+          Bid on authenticated limited pieces — AP Royal Oak, KAWS figures, and archive Supreme collabs with real-time Base settlement.
+        </p>
+      </div>
+      <div class="tag-live w-fit shrink-0">
+        <span class="live-dot" />
+        {{ auctions.length }} live lots
+      </div>
+    </div>
 
+    <!-- Auction grid -->
     <div class="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
       <article v-for="item in auctions" :key="item.id" class="product-card">
-        <img class="h-64 w-full object-cover" :src="item.image" :alt="item.title">
-        <div class="p-5">
-          <div class="flex items-center justify-between gap-3">
-            <span class="rounded-full bg-blue-500/15 px-3 py-1 text-sm font-bold text-blue-700 dark:text-blue-200">{{ item.status }}</span>
-            <span class="text-sm font-bold text-[var(--muted)]">{{ item.maker }}</span>
-          </div>
-          <h2 class="mt-4 text-2xl font-semibold">{{ item.title }}</h2>
-          <div class="mt-5 flex items-end justify-between gap-3">
-            <div>
-              <p class="text-sm text-[var(--muted)]">Current bid</p>
-              <p class="text-3xl font-semibold">{{ item.bid }}</p>
-              <p class="mt-1 text-sm text-[var(--muted)]">{{ item.bidCount }} bids</p>
+        <!-- Image with live overlay -->
+        <div class="relative overflow-hidden">
+          <img class="h-60 w-full object-cover" :src="item.image" :alt="item.title">
+          <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/78 to-transparent p-4">
+            <div class="flex items-center justify-between">
+              <div class="tag-live">
+                <span class="live-dot" />
+                {{ item.status }}
+              </div>
+              <span class="text-sm font-bold text-white/65">{{ item.bidCount }} bids</span>
             </div>
-            <NuxtLink class="secondary-button" :to="`/shop-info/${item.shopId}`">
-              <Icon name="lucide:store" class="size-5" />
-              Shop
-            </NuxtLink>
           </div>
-          <div v-if="requirementLabels(item.requirement).length" class="mt-4 rounded-2xl bg-[var(--panel-soft)] p-3">
-            <p class="text-xs font-bold uppercase text-[var(--muted)]">Required verification</p>
-            <div class="mt-2 flex flex-wrap gap-2">
+        </div>
+
+        <!-- Lot info -->
+        <div class="p-5">
+          <div class="flex items-center justify-between gap-2">
+            <span class="tag">Auction</span>
+            <span class="text-xs font-bold uppercase tracking-widest text-[var(--muted)]">{{ item.maker }}</span>
+          </div>
+
+          <h2 class="mt-3 text-lg font-black tracking-tight leading-snug">{{ item.title }}</h2>
+
+          <!-- Current bid highlight -->
+          <div class="mt-4 rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3.5">
+            <p class="text-xs font-bold uppercase tracking-widest text-[var(--muted)]">Current bid</p>
+            <p class="mt-0.5 text-3xl font-black tracking-tight tabular">{{ item.bid }}</p>
+          </div>
+
+          <!-- Requirements -->
+          <div
+            v-if="requirementLabels(item.requirement).length"
+            class="mt-4 rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3"
+          >
+            <p class="mb-2 text-xs font-bold uppercase tracking-widest text-[var(--muted)]">Required to bid</p>
+            <div class="flex flex-wrap gap-1.5">
               <span v-for="label in requirementLabels(item.requirement)" :key="label" class="tag">{{ label }}</span>
             </div>
           </div>
-          <div class="mt-5 grid grid-cols-[1fr_auto] gap-2">
-            <input v-model.number="bidById[item.id]" class="input" min="1" step="10" type="number" aria-label="Bid amount">
-            <button class="primary-button" type="button" :disabled="!canParticipate(item.requirement)">
-              <Icon :name="canParticipate(item.requirement) ? 'lucide:gavel' : 'lucide:shield-alert'" class="size-5" />
+
+          <!-- Shop link -->
+          <div class="mt-4 flex justify-end">
+            <NuxtLink class="secondary-button text-sm" :to="`/shop-info/${item.shopId}`">
+              <Icon name="lucide:store" class="size-4" />
+              Shop
+            </NuxtLink>
+          </div>
+
+          <!-- Bid action -->
+          <div class="mt-3 grid grid-cols-[1fr_auto] gap-2">
+            <input
+              v-model.number="bidById[item.id]"
+              class="input tabular"
+              min="1"
+              step="10"
+              type="number"
+              aria-label="Bid amount"
+            >
+            <button
+              class="primary-button text-sm"
+              type="button"
+              :disabled="!canParticipate(item.requirement)"
+            >
+              <Icon
+                :name="canParticipate(item.requirement) ? 'lucide:gavel' : 'lucide:lock'"
+                class="size-4"
+              />
               {{ canParticipate(item.requirement) ? 'Bid' : 'Locked' }}
             </button>
           </div>
